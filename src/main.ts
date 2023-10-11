@@ -8,6 +8,8 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // 启动 CORS
+  app.enableCors();
   // 全局数据转换
   app.useGlobalInterceptors(new TransformInterceptor());
   // 全局错误拦截
