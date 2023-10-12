@@ -12,8 +12,7 @@ export class UserController {
   @ApiOperation({ summary: '用户登陆' })
   @Post('login')
   async login(@Body() loginUserDto: LoginUserDto) {
-    const { password, ...rest } = await this.userService.login(loginUserDto);
-    return rest;
+    return await this.userService.login(loginUserDto);
   }
 
   @ApiOperation({ summary: '用户注册' })

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -7,6 +7,7 @@ import * as bcrypt from 'bcrypt';
 import { RegisterUserDto } from './dto/user-register.dto';
 import { LoginUserDto } from './dto/user-login.dto';
 import { BusinessException } from 'src/common/exceptions/business.exceptions.filter';
+import { JwtService } from '@nestjs/jwt';
 
 /**
  * bcrypt 加盐轮数
@@ -17,6 +18,9 @@ const saltRounds = 10;
 export class UserService {
   @InjectRepository(User)
   private readonly userRepository: Repository<User>;
+
+  @Inject(JwtService)
+  private readonly jwtService: JwtService;
 
   /**
    * 用户登陆
@@ -36,7 +40,28 @@ export class UserService {
     if (!result) {
       throw BusinessException.throwBadRequest('The password is wrong');
     }
-    return existUser;
+
+    const access_token = await this.jwtService.signAsync(
+      {
+        userId: existUser.id,
+        username: existUser.username,
+      },
+      {
+        expiresIn: '1d',
+      },
+    );
+
+    const refresh_token = await this.jwtService.signAsync(
+      {
+        userId: existUser.id,
+        username: existUser.username,
+      },
+      {
+        expiresIn: '1d',
+      },
+    );
+
+    return { access_token, refresh_token };
   }
 
   /**
