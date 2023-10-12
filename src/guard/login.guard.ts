@@ -6,6 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
 import { REQUIRE_LOGIN_KEY } from 'src/decorator/require-login.decorator';
@@ -16,9 +17,11 @@ const AUTHORIZATION_KEY = 'Bearer';
 export class LoginGuard implements CanActivate {
   @Inject(Reflector)
   private readonly reflector: Reflector;
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+
+  @Inject(JwtService)
+  private readonly jwtService: JwtService;
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const requireLogin = this.reflector.getAllAndOverride(REQUIRE_LOGIN_KEY, [
       context.getClass(),
       context.getHandler(),
@@ -36,6 +39,15 @@ export class LoginGuard implements CanActivate {
     if (authorizationKey !== AUTHORIZATION_KEY) {
       throw new UnauthorizedException('The Authorization key is wrong');
     }
+
+    const authorizationJwt = authorizationStr[1];
+
+    try {
+      await this.jwtService.verifyAsync(authorizationJwt);
+    } catch (error) {
+      throw new UnauthorizedException('The JWT is expired');
+    }
+
     return true;
   }
 }
