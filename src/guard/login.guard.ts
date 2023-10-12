@@ -8,8 +8,13 @@ import {
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { Observable } from 'rxjs';
-import { REQUIRE_LOGIN_KEY } from 'src/decorator/require-login.decorator';
+import { PUBLIC_KEY } from 'src/decorator/public.decorator';
+
+declare module 'express' {
+  interface Request {
+    user: Payload;
+  }
+}
 
 const AUTHORIZATION_KEY = 'Bearer';
 
@@ -22,19 +27,24 @@ export class LoginGuard implements CanActivate {
   private readonly jwtService: JwtService;
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requireLogin = this.reflector.getAllAndOverride(REQUIRE_LOGIN_KEY, [
+    const isPublic = this.reflector.getAllAndOverride(PUBLIC_KEY, [
       context.getClass(),
       context.getHandler(),
     ]);
-    if (!requireLogin) {
+
+    if (isPublic) {
       return true;
     }
 
     const request: Request = context.switchToHttp().getRequest();
+
     const authorizationStr = request.headers.authorization.split(' ');
     if (authorizationStr.length !== 2) {
-      throw new UnauthorizedException('The form of Authorization is wrong');
+      throw new UnauthorizedException(
+        `The form of Authorization is wrong, it should be '${AUTHORIZATION_KEY} xxx'`,
+      );
     }
+
     const authorizationKey = authorizationStr[0];
     if (authorizationKey !== AUTHORIZATION_KEY) {
       throw new UnauthorizedException('The Authorization key is wrong');
@@ -43,7 +53,8 @@ export class LoginGuard implements CanActivate {
     const authorizationJwt = authorizationStr[1];
 
     try {
-      await this.jwtService.verifyAsync(authorizationJwt);
+      const user = await this.jwtService.verifyAsync<Payload>(authorizationJwt);
+      request.user = user;
     } catch (error) {
       throw new UnauthorizedException('The JWT is expired');
     }
