@@ -1,7 +1,9 @@
+import { UserInfo } from 'src/user-info/entities/user-info.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -22,4 +24,7 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(() => UserInfo, (userInfo) => userInfo.user)
+  userInfo: UserInfo;
 }

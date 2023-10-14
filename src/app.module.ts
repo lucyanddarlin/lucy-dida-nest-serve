@@ -7,6 +7,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/entities/user.entity';
 import { APP_GUARD } from '@nestjs/core';
 import { LoginGuard } from './guard/login.guard';
+import { UserInfoModule } from './user-info/user-info.module';
+import { UserInfo } from './user-info/entities/user-info.entity';
 
 @Module({
   imports: [
@@ -26,7 +28,7 @@ import { LoginGuard } from './guard/login.guard';
       database: 'lucy-dida',
       synchronize: true,
       logging: true,
-      entities: [User],
+      entities: [User, UserInfo],
       poolSize: 10,
       connectorPackage: 'mysql2',
       extra: {
@@ -34,6 +36,7 @@ import { LoginGuard } from './guard/login.guard';
       },
     }),
     UserModule,
+    UserInfoModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: LoginGuard }],

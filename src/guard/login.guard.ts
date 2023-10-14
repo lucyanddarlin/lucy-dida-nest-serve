@@ -38,6 +38,10 @@ export class LoginGuard implements CanActivate {
 
     const request: Request = context.switchToHttp().getRequest();
 
+    if (!request.headers.authorization) {
+      throw new UnauthorizedException('JWT is missing');
+    }
+
     const authorizationStr = request.headers.authorization.split(' ');
     if (authorizationStr.length !== 2) {
       throw new UnauthorizedException(

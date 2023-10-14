@@ -22,7 +22,7 @@ export class TransformInterceptor<T>
   ): Observable<BaseResponse<T>> | Promise<Observable<BaseResponse<T>>> {
     return next.handle().pipe(
       map((data) => ({
-        data,
+        data: data ?? '',
         status: 0,
         message: '',
       })),
