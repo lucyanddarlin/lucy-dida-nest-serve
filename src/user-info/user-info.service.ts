@@ -47,11 +47,22 @@ export class UserInfoService {
     };
   }
 
-  async updateUserInfo(user: Payload, userInfoDto: Partial<UserInfoDto>) {
-    const userInfo = await this.userService.getUserInfoByUserId(user.userId);
+  async updateUserInfo(
+    { userId, username }: Payload,
+    userInfoDto: Partial<UserInfoDto>,
+  ): Promise<UserInfoVo> {
+    const userInfo = await this.userService.getUserInfoByUserId(userId);
 
-    await this.userInfoRepository.save({ ...userInfo, ...userInfoDto });
-
-    return await this.getUserInfo(user);
+    const { phone, email, createdAt } = await this.userInfoRepository.save({
+      ...userInfo,
+      ...userInfoDto,
+    });
+    return {
+      userId,
+      username,
+      phone,
+      email,
+      createdAt,
+    };
   }
 }
