@@ -84,7 +84,7 @@ export class UserService {
       saltRounds,
     );
 
-    await this.userInfoService.saveUserInfo({
+    await this.userInfoService.createUserInfo({
       ...registerUserDto,
       password: hashedPassword,
     });

@@ -17,10 +17,10 @@ export class UserInfoService {
   private readonly userService: UserService;
 
   /**
-   * 保存用户信息
+   * 创建用户信息
    * @param registerUserDto
    */
-  async saveUserInfo(registerUserDto: RegisterUserDto) {
+  async createUserInfo(registerUserDto: RegisterUserDto) {
     const user = new User();
     user.username = registerUserDto.username;
     user.password = registerUserDto.password;
@@ -47,6 +47,11 @@ export class UserInfoService {
     };
   }
 
+  /**
+   * 更新用户信息
+   * @param param0
+   * @param userInfoDto
+   */
   async updateUserInfo(
     { userId, username }: Payload,
     userInfoDto: Partial<UserInfoDto>,
